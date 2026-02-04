@@ -1,0 +1,30 @@
+# Python
+pycache/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Logs & data
+*.log
+.csv
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.
+
+# systemd / runtime
+*.service.bak
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+#Node / other (safe to ignore if present)
+node_modules/
