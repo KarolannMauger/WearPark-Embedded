@@ -26,5 +26,4 @@ Thumbs.db
 *.swp
 *~
 
-#Node / other (safe to ignore if present)
-node_modules/
+local/
