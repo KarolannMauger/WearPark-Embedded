@@ -15,7 +15,7 @@ def main():
         print(f"Gyro  (rad/s): {gx:.2f}, {gy:.2f}, {gz:.2f}")
         print(f"Mag   (uT):    {mx:.2f}, {my:.2f}, {mz:.2f}")
         print("-" * 40)
-        time.sleep(1)
+        time.sleep(0.5)
 
 if __name__ == "__main__":
     main()
