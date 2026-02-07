@@ -15,11 +15,15 @@ DEVICE_ID = os.getenv("DEVICE_ID", "unknown-device")
 SAMPLE_RATE_HZ = int(os.getenv("SAMPLE_RATE_HZ", 50))
 WINDOW_SECONDS = int(os.getenv("WINDOW_SECONDS", 10))
 TIMEOUT_S = int(os.getenv("TIMEOUT_S", 5))
+JWT_TOKEN = os.getenv("JWT_TOKEN")
 
 
 HEADERS = {
     "Content-Type": "application/json",
 }
+
+if JWT_TOKEN:
+    HEADERS["Authorization"] = f"Bearer {JWT_TOKEN}"
 
 def current_time_millis():
     return datetime.now(timezone(timedelta(hours=-5), 'EST')).isoformat()
@@ -60,8 +64,8 @@ def main():
         if len(accel_ax_buf) >= max_samples:
             ts_end = current_time_millis()
             payload = {
-                "ts_start": ts_start,
-                "ts_end": ts_end,
+                "start": ts_start,
+                "end": ts_end,
                 "data" : {
                     "ax" : accel_ax_buf,
                     "ay" : accel_ay_buf,
