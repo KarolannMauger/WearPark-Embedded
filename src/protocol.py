@@ -7,6 +7,7 @@ _ENDIAN = ">"
 TYPE_AUTH = 0
 TYPE_PACKED = 2
 
+_AUTH_HDR_FMT = _ENDIAN + "B q"
 _PACKED_HDR_FMT = _ENDIAN + "B I"
 _PACKED_ITEM_FMT = _ENDIAN + "I 6f"
 
@@ -17,7 +18,7 @@ def encode_auth_frame(jwt_token: str, timestamp_ms: int | None = None) -> bytes:
     if timestamp_ms is None:
         timestamp_ms = epoch_ms()
     jwt_bytes = (jwt_token or "").encode("utf-8") + b"\x00"
-    header = struct.pack(_ENDIAN + "B q", TYPE_AUTH, int(timestamp_ms))
+    header = struct.pack(_AUTH_HDR_FMT, TYPE_AUTH, int(timestamp_ms))
     return header + jwt_bytes
 
 @dataclass(frozen=True)

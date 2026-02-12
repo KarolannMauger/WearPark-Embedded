@@ -1,6 +1,5 @@
 from collections import deque
-from typing import Deque, List, Optional, Tuple
-
+from typing import Deque, List
 from .protocol import Sample
 
 class MemQueue:
@@ -14,13 +13,6 @@ class MemQueue:
         if overflow > 0:
             for _ in range(overflow):
                 self._q.popleft()
-
-    def pop_many(self, n: int) -> list[Sample]:
-        n = max(0, int(n))
-        out: List[Sample] = []
-        for _ in range(min(n, len(self._q))):
-            out.append(self._q.popleft())
-        return out
 
     def peek_many(self, n: int) -> list[Sample]:
         n = max(0, int(n))

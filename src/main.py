@@ -1,5 +1,5 @@
-from .config import Settings
-from .streamer import Streamer
+from wearpark.config import Settings
+from wearpark.streamer import Streamer
 
 def main():
     Streamer(Settings()).run()

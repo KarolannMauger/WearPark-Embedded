@@ -1,6 +1,5 @@
 import socket
 from typing import Optional
-
 from .config import Settings
 
 class TcpClient:
