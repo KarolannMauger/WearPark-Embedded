@@ -1,7 +1,7 @@
 import time
 import threading
 from .config import Settings
-from .protocol import Sample, encode_auth_frame, encode_packed_frame, epoch_ms
+from .protocol import Sample, encode_auth_frame, encode_single_frame, epoch_ms
 from .sensor import ICM20948Sensor
 from .tcp_client import TcpClient
 from .mem_queue import MemQueue
@@ -23,7 +23,9 @@ class Streamer:
         if not self.s.jwt_token:
             raise RuntimeError("JWT_TOKEN missing")
         self.client.sendall(encode_auth_frame(self.s.jwt_token, timestamp_ms=epoch_ms()))
+        print("Sent auth frame, waiting for response...")
         resp = self.client.recv_until_newline()
+        print(resp)
         if not resp.startswith(b"OK"):
             raise RuntimeError(resp.decode(errors="ignore"))
 
@@ -55,13 +57,13 @@ class Streamer:
             if self.client.sock is None:
                 self._connect_loop()
             try:
-                if len(self.queue) >= max(1, self.s.packed_items):
-                    batch = self.queue.peek_many(self.s.packed_items)
-                    frame = encode_packed_frame(batch)
-                    self.client.sendall(frame)
-                    self.queue.drop_many(len(batch))
-                else:
-                    time.sleep(max(0.0, self.s.send_loop_sleep_s))
+                
+                sample = self.queue.pop()
+                if sample is None:
+                    time.sleep(0.01)
+                    continue
+                frame = encode_single_frame(sample)
+                self.client.sendall(frame)
             except Exception:
                 self.client.close()
                 time.sleep(max(0.1, self.s.reconnect_backoff_s))
