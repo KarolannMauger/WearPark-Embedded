@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# This class holds the configuration settings for the application, which are loaded from environment variables.
 @dataclass(frozen=True)
+# The @dataclass decorator is used to automatically generate special methods __init__, and frozen=True makes the instance immutable.
 class Settings:
     host: str = os.getenv("TCP_HOST", "127.0.0.1")
     port: int = int(os.getenv("TCP_PORT", "9000"))
