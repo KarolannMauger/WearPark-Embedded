@@ -5,6 +5,7 @@ from .protocol import Sample, encode_auth_frame, encode_single_frame, epoch_ms
 from .sensor import ICM20948Sensor
 from .tcp_client import TcpClient
 from .mem_queue import MemQueue
+from .errors import ErrorCode, WearParkError
 
 # The Streamer class is responsible for managing the data collection from the sensor, queuing the samples, and sending them to a server over TCP. 
 # It handles authentication, reconnection logic, and ensures that samples are sent at the configured sample rate.
@@ -27,13 +28,13 @@ class Streamer:
     # The _handshake method performs the authentication handshake with the server by sending an authentication frame containing the JWT token and waiting for a response.
     def _handshake(self) -> None:
         if not self.s.jwt_token:
-            raise RuntimeError("JWT_TOKEN missing")
+            raise WearParkError(ErrorCode.AUTH_TOKEN_MISSING)
         self.client.sendall(encode_auth_frame(self.s.jwt_token, timestamp_ms=epoch_ms()))
         print("Sent auth frame, waiting for response...")
         resp = self.client.recv_until_newline()
         print(resp)
         if not resp.startswith(b"OK"):
-            raise RuntimeError(resp.decode(errors="ignore"))
+            raise WearParkError(ErrorCode.AUTH_FAILED, resp.decode(errors="ignore"))
 
     # The _producer_forever method runs in a loop, reading data from the sensor at the configured sample rate, calculating the timestamp offset, and pushing the samples into the in-memory queue.
     def _producer_forever(self) -> None:
