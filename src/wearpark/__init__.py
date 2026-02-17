@@ -1,0 +1,2 @@
+# Init file for the wearpark package. This file is intentionally left empty to indicate that the directory is a Python package. 
+# It allows you to import modules from the wearpark package, such as tcp_client and streamer, in other parts of your application.
