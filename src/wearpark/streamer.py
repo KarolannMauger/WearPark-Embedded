@@ -29,6 +29,12 @@ class Streamer:
     def _handshake(self) -> None:
         # if not self.s.jwt_token:
         #     raise WearParkError(ErrorCode.AUTH_TOKEN_MISSING)
+        print("[TIME] Waiting for server response...")
+        resp = self.client.recv_until_newline()
+        if not resp.startswith(b"OK"):
+            print(f"[TIME] Authentication failed: {resp.decode(errors='ignore')}")
+            raise WearParkError(ErrorCode.AUTH_FAILED, resp.decode(errors="ignore"))
+        
         print("[TIME] Sending timestamp frame...")
         time_frame = encode_auth_frame(timestamp_ms=epoch_ms())
         # print(f"[TIME] Timestamp frame size: {len(time_frame)} bytes")
@@ -39,6 +45,10 @@ class Streamer:
         if not resp.startswith(b"OK"):
             print(f"[TIME] Authentication failed: {resp.decode(errors='ignore')}")
             raise WearParkError(ErrorCode.AUTH_FAILED, resp.decode(errors="ignore"))
+        # elif not resp.startswith(b"no_user") or not resp.startswith(b"no_device"):
+        #     print(f"[TIME] Unexpected authentication response: {resp.decode(errors='ignore')}")
+        #     raise WearParkError(ErrorCode.AUTH_FAILED, f"Unexpected authentication response: {resp.decode(errors='ignore')}")
+        
         # print("[TIME] Authentication successful!")
 
     # The _producer_forever method runs in a loop, reading data from the sensor at the configured sample rate, calculating the timestamp offset, and pushing the samples into the in-memory queue.
