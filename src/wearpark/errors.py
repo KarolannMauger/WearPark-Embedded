@@ -10,7 +10,7 @@ class ErrorCode(IntEnum):
     TLS_HANDSHAKE_FAILED = 1404
     SENSOR_INIT_FAILED = 2000
     SENSOR_READ_FAILED = 2001
-    # OS/Socket error codes (Linux errno)
+    # Socket error codes (Linux errno)
     EAGAIN = 11
     EWOULDBLOCK = 11
     EACCES = 13
