@@ -118,7 +118,6 @@ class TcpClient:
         # print(f"[TCP] Receiving data (timeout: {self.s.io_timeout_s}s)...")
         try:
             while len(buf) < max_bytes:
-                # Check overall timeout
                 if time.time() - start_time > self.s.io_timeout_s:
                     # print(f"[TCP] Receive timeout after {time.time() - start_time:.2f}s")
                     self.close()
