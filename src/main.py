@@ -7,7 +7,6 @@ def main():
     try:
         Streamer(Settings()).run()
     except WearParkError as e:
-        print(f"ERROR {e.code}: {e}")
         raise SystemExit(1) from e
 
 # This block checks if the script is being run directly (as the main module) and calls the main function to start the application.

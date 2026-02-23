@@ -16,12 +16,11 @@ def epoch_ms() -> int:
 
 # The encode_auth_frame function takes a JWT token and an optional timestamp in milliseconds, and constructs a byte frame for authentication. 
 # If the timestamp is not provided, it uses the current time. The frame consists of a header with the type and timestamp, followed by the JWT token as a null-terminated string.
-def encode_auth_frame(jwt_token: str, timestamp_ms: int | None = None) -> bytes:
+def encode_auth_frame(timestamp_ms: int | None = None) -> bytes:
     if timestamp_ms is None:
         timestamp_ms = epoch_ms()
-    jwt_bytes = (jwt_token or "").encode("utf-8") + b"\x00"
     header = struct.pack(_AUTH_FMT, TYPE_AUTH, int(timestamp_ms)) # Pack the type and timestamp into a binary format using struct.
-    return header + jwt_bytes
+    return header
 
 # The Sample class is a data structure that represents a single sample of sensor data, including a timestamp offset and the values of accelerometer and gyroscope readings. 
 @dataclass(frozen=True)

@@ -6,9 +6,11 @@ class ErrorCode(IntEnum):
     CONFIG_ERROR = 1400
     AUTH_TOKEN_MISSING = 1401
     AUTH_FAILED = 1402
+    TLS_CONFIG_ERROR = 1403
+    TLS_HANDSHAKE_FAILED = 1404
     SENSOR_INIT_FAILED = 2000
     SENSOR_READ_FAILED = 2001
-    # OS/Socket error codes (Linux errno)
+    # Socket error codes (Linux errno)
     EAGAIN = 11
     EWOULDBLOCK = 11
     EACCES = 13
@@ -30,6 +32,8 @@ ERROR_MESSAGES = {
     ErrorCode.CONFIG_ERROR: "Invalid or missing configuration",
     ErrorCode.AUTH_TOKEN_MISSING: "JWT token missing",
     ErrorCode.AUTH_FAILED: "Authentication failed",
+    ErrorCode.TLS_CONFIG_ERROR: "TLS configuration error",
+    ErrorCode.TLS_HANDSHAKE_FAILED: "TLS handshake failed",
     ErrorCode.SENSOR_INIT_FAILED: "Sensor initialization failed",
     ErrorCode.SENSOR_READ_FAILED: "Sensor read failed",
     ErrorCode.EAGAIN: "Resource temporarily unavailable",
