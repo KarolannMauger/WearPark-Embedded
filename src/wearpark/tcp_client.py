@@ -1,10 +1,13 @@
 import socket
 import ssl
 import time
+import logging
 from pathlib import Path
 from typing import Optional
 from .config import Settings
 from .errors import ErrorCode, WearParkError
+
+logger = logging.getLogger(__name__)
 
 # The TcpClient class is a simple wrapper around a TCP socket that provides methods for connecting to a server, sending data, and receiving data until a newline character is encountered. 
 # It also handles socket timeouts and ensures that the socket is properly closed when needed.
@@ -78,9 +81,11 @@ class TcpClient:
             raise
         except ssl.SSLError as e:
             # print(f"[TLS] SSL handshake failed: {e}")
+            logger.error("TLS handshake failed: %s", e)
             raise WearParkError(ErrorCode.TLS_HANDSHAKE_FAILED, str(e)) from e
         except Exception as e:
             # print(f"[TCP] Connection failed: {e}")
+            logger.error("Connection failed: %s", e)
             raise WearParkError(ErrorCode.ECONNREFUSED, str(e)) from e
     
     # The close method closes the socket if it is currently open and sets the socket attribute to None to indicate that there is no active connection.
@@ -103,10 +108,12 @@ class TcpClient:
         except socket.timeout:
             # print("[TCP] Send timeout - closing connection")
             self.close()
+            logger.error("Send timeout - closing connection")
             raise WearParkError(ErrorCode.ENOTCONN, "Backend timeout on send") from None
         except Exception as e:
             # print(f"[TCP] Send error: {e} - closing connection")
             self.close()
+            logger.error("Send error - closing connection: %s", e)
             raise WearParkError(ErrorCode.ENOTCONN, str(e)) from e
 
     # The recv_until_newline method reads data from the socket one byte at a time until it encounters a newline character or reaches the maximum number of bytes specified by max_bytes.
@@ -136,9 +143,11 @@ class TcpClient:
             return result
         except socket.timeout:
             self.close()
+            logger.error("Receive timeout - closing connection")
             raise WearParkError(ErrorCode.ECONNRESET, "No response from backend (timeout)") from None
         except WearParkError:
             raise
         except Exception as e:
             self.close()
+            logger.error("Receive error - closing connection: %s", e)
             raise WearParkError(ErrorCode.ECONNRESET, str(e)) from e
