@@ -4,8 +4,15 @@ pycache/
 *.pyo
 *.pyd
 
+# Testing
+.pytest_cache/
+htmlcov/
+reports/
+.coverage
+
 # Logs & data
 *.log
+logs/
 .csv
 
 # OS / Editor
@@ -27,3 +34,30 @@ Thumbs.db
 *~
 
 local/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Test coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+coverage.xml
+*.cover
+
+# Test reports
+reports/
+*.html
+
+# Optional: Don't commit test certificates (regenerate as needed)
+# Uncomment if you want to regenerate certs each time
+# fixtures/certs/*.pem
+# fixtures/certs/*.crt
+# fixtures/certs/*.key
+# fixtures/certs/*.srl
