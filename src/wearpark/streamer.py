@@ -1,11 +1,14 @@
 import time
 import threading
+import logging
 from .config import Settings
 from .protocol import Sample, encode_auth_frame, encode_single_frame, epoch_ms
 from .sensor import ICM20948Sensor
 from .tcp_client import TcpClient
 from .mem_queue import MemQueue
 from .errors import ErrorCode, WearParkError
+
+logger = logging.getLogger(__name__)
 
 # The Streamer class is responsible for managing the data collection from the sensor, queuing the samples, and sending them to a server over TCP. 
 # It handles authentication, reconnection logic, and ensures that samples are sent at the configured sample rate.
@@ -85,6 +88,7 @@ class Streamer:
             except Exception as e:
                 # print(f"[CONNECTION] Failed: {e}")
                 self.client.close()
+                logger.error("Connection attempt failed: %s", e)
                 print(f"[CONNECTION] Retrying in {self.s.reconnect_backoff_s}s...")
                 time.sleep(max(0.1, self.s.reconnect_backoff_s))
 
@@ -110,6 +114,7 @@ class Streamer:
             except Exception as e:
                 # print(f"[SENDER] Error: {e}")
                 self.client.close()
+                logger.error("Sender error: %s", e)
                 print(f"[SENDER] Reconnecting in {self.s.reconnect_backoff_s}s...")
                 time.sleep(max(0.1, self.s.reconnect_backoff_s))
 

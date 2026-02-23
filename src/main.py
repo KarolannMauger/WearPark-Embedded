@@ -1,11 +1,14 @@
 from wearpark.config import Settings
+from wearpark.logging_config import configure_logging
 from wearpark.streamer import Streamer
 from wearpark.errors import WearParkError
 
 # The main function initializes the Streamer with the configuration settings and starts the streaming process.
 def main():
     try:
-        Streamer(Settings()).run()
+        settings = Settings()
+        configure_logging(settings)
+        Streamer(settings).run()
     except WearParkError as e:
         raise SystemExit(1) from e
 

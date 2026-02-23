@@ -23,3 +23,7 @@ class Settings:
     tls_client_key_path: str = os.getenv("TLS_CLIENT_KEY_PATH", "")
     tls_client_key_password: str = os.getenv("TLS_CLIENT_KEY_PASSWORD", "")
     tls_require_client_cert: bool = os.getenv("TLS_REQUIRE_CLIENT_CERT", "false").strip().lower() in {"1", "true", "yes", "on"}
+    log_level: str = os.getenv("LOG_LEVEL", "INFO")
+    log_file: str = os.getenv("LOG_FILE", "logs/wearpark.log")
+    log_max_bytes: int = int(os.getenv("LOG_MAX_BYTES", "10485760"))
+    log_backup_count: int = int(os.getenv("LOG_BACKUP_COUNT", "3"))
