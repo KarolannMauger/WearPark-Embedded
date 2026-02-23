@@ -65,10 +65,8 @@ jobs:
             const percent = coverage.totals.percent_covered;
             
             const status = percent >= 80 ? 'Good' : 'Bad';
-            const comment = `## CI Status
-            
-${status} **Coverage:** ${percent.toFixed(2)}% (threshold: 80%)
-${percent >= 80 ? 'Good PR can be merged' : 'Bad PR blocked - coverage below 80%'}`;
+            const mergeStatus = percent >= 80 ? 'Good PR can be merged' : 'Bad PR blocked - coverage below 80%';
+            const comment = `## CI Test Results\n\n${status} **Coverage:** ${percent.toFixed(2)}% (threshold: 80%)\n${mergeStatus}`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
