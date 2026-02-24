@@ -48,6 +48,37 @@ pip install --upgrade adafruit-blinka adafruit-circuitpython-icm20x lgpio
 pip install requests
 pip install python-dotenv
 
+## 4) Tests
+
+Installation des dépendances de test :
+```bash
+pip install -r requirements-test.txt
+```
+
+### Tests unitaires
+```bash
+pytest                    # Lancer les tests
+make test                 # Alternative
+```
+
+### Tests de charge (Locust)
+```bash
+cd src/tests/load
+python mock_server.py     # Terminal 1
+locust -f locustfile.py   # Terminal 2 - http://localhost:8089
+```
+
+### Scan de sécurité
+```bash
+bandit -r src/wearpark/   # Scan du code
+pip-audit                 # Scan des dépendances
+make security             # Les deux
+```
+
+Voir [src/tests/README.md](src/tests/README.md) pour plus de détails.
+
+---
+
 ### (Optionnel) utile si Blinka détecte mal le Pi 5
 export BLINKA_FORCEBOARD=RPI_5
 export BLINKA_FORCECHIP=BCM2712
