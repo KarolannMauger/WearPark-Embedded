@@ -76,9 +76,8 @@ def test_streamer_producer_collects_samples(monkeypatch):
     """Test que le producer collecte les samples."""
     monkeypatch.setattr(streamer_module, "ICM20948Sensor", FakeSensor)
     
-    s = Streamer(Settings(sample_rate_hz=100))  # Plus rapide: 0.01s par sample
+    s = Streamer(Settings(sample_rate_hz=100))
     
-    # Mock pour arrêter après quelques itérations
     call_count = [0]
     original_read = s.sensor.read
     
@@ -95,7 +94,6 @@ def test_streamer_producer_collects_samples(monkeypatch):
     except KeyboardInterrupt:
         pass
     
-    # Vérifier que des samples ont été ajoutés
     assert len(s.queue) == 3
 
 
@@ -115,21 +113,34 @@ def test_streamer_connect_loop_success(monkeypatch):
 def test_streamer_connect_loop_retries_on_failure(monkeypatch):
     """Test que _connect_loop réessaye en cas d'échec."""
     monkeypatch.setattr(streamer_module, "ICM20948Sensor", FakeSensor)
-    
-    s = Streamer(Settings(reconnect_backoff_s=0.001))  # Très rapide
-    
+
+    s = Streamer(Settings(reconnect_backoff_s=0.001))
+
     attempt = [0]
-    
+
     def fake_connect():
         attempt[0] += 1
         if attempt[0] == 1:
             raise Exception("Connection failed")
         s.client.connected = True
-    
+
     s.client = FakeClient([b"OK\n", b"OK\n"])
     s.client.connect = fake_connect
-    
+
     s._connect_loop()
-    
+
     assert attempt[0] == 2
     assert s.client.connected
+
+
+def test_streamer_connect_loop_resets_session_start_on_reconnect(monkeypatch):
+    monkeypatch.setattr(streamer_module, "ICM20948Sensor", FakeSensor)
+
+    s = Streamer(Settings(reconnect_backoff_s=0.001))
+    s.client = FakeClient([b"OK\n", b"OK\n"])
+
+    s.session_start_ms = 1_000_000
+
+    s._connect_loop()
+
+    assert s.session_start_ms is None
