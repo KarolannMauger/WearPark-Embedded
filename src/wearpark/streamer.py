@@ -81,6 +81,7 @@ class Streamer:
             try:
                 attempt += 1
                 print(f"[CONNECTION] Connection attempt #{attempt}")
+                self.session_start_ms = None
                 self.client.connect()
                 self._handshake()
                 print("[CONNECTION] Successfully connected and authenticated!")
