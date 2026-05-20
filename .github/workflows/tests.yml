@@ -1,0 +1,184 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'requirements-test.txt'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+      
+      - name: Run tests with coverage
+        run: |
+          pytest \
+            --cov=wearpark \
+            --cov-report=term \
+            --cov-report=html:htmlcov \
+            --cov-report=json:coverage.json \
+            --junit-xml=junit.xml
+      
+      - name: Check coverage threshold (80%)
+        run: |
+          COVERAGE=$(grep -o '"percent_covered": [0-9.]*' coverage.json | grep -o '[0-9.]*')
+          echo "Current coverage: ${COVERAGE}%"
+          
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "Coverage ${COVERAGE}% is below 80% threshold"
+            exit 1
+          fi
+          echo "Coverage ${COVERAGE}% meets 80% threshold"
+      
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: junit.xml
+      
+      - name: Notify Teams on failure
+        if: failure()
+        run: |
+          payload=$(cat << 'EOF'
+          {
+            "@type": "MessageCard",
+            "@context": "https://schema.org/extensions",
+            "summary": "WearPark CI Pipeline Failed",
+            "themeColor": "FF0000",
+            "title": "CI Pipeline Failed",
+            "sections": [
+              {
+                "activityTitle": "Branch: ${{ github.ref_name }}",
+                "activitySubtitle": "Workflow: ${{ github.workflow }}",
+                "facts": [
+                  { "name": "Repository", "value": "${{ github.repository }}" },
+                  { "name": "Actor", "value": "${{ github.actor }}" },
+                  { "name": "Commit", "value": "${{ github.sha }}" }
+                ],
+                "markdown": true
+              },
+              {
+                "activityTitle": "Issue Details",
+                "text": "**Test Failure or Coverage < 80%**\n\nClick below to view the full details and logs.",
+                "markdown": true
+              }
+            ],
+            "potentialAction": [
+              {
+                "@type": "OpenUri",
+                "name": "View Workflow Run",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          )
+          
+          curl -X POST -H "Content-Type: application/json" \
+               -d "$payload" \
+               "${{ secrets.MS_TEAMS_WEBHOOK_URL }}"
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'requirements-test.txt'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+      
+      - name: Run Bandit security scan
+        run: |
+          bandit -r src/wearpark/ -f json -o bandit-report.json || true
+      
+      - name: Run pip-audit dependency check
+        run: |
+          pip-audit --desc || true
+      
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+      
+      - name: Notify Teams on failure
+        if: failure()
+        run: |
+          payload=$(cat << 'EOF'
+          {
+            "@type": "MessageCard",
+            "@context": "https://schema.org/extensions",
+            "summary": "WearPark Security Scan Failed",
+            "themeColor": "FF6600",
+            "title": "Security Scan Failed",
+            "sections": [
+              {
+                "activityTitle": "Branch: ${{ github.ref_name }}",
+                "activitySubtitle": "Workflow: ${{ github.workflow }}",
+                "facts": [
+                  { "name": "Repository", "value": "${{ github.repository }}" },
+                  { "name": "Actor", "value": "${{ github.actor }}" }
+                ],
+                "markdown": true
+              }
+            ],
+            "potentialAction": [
+              {
+                "@type": "OpenUri",
+                "name": "View Details",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          )
+          
+          curl -X POST -H "Content-Type: application/json" \
+               -d "$payload" \
+               "${{ secrets.MS_TEAMS_WEBHOOK_URL }}"
